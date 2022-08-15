@@ -17,7 +17,7 @@ public class BankService extends BankServiceGrpc.BankServiceImplBase {
   }
 
   @Override
-  public void withdrawl(WithdrawlRequest request, StreamObserver<Withdrawl> responseObserver) {
+  public void withdraw(WithdrawlRequest request, StreamObserver<Withdrawl> responseObserver) {
     int accountNumber = request.getAccountNumber();
     int amount = request.getAmount();
     int balance = AccountDatabase.getBalance(accountNumber);
@@ -25,7 +25,10 @@ public class BankService extends BankServiceGrpc.BankServiceImplBase {
     if (balance < amount) {
       Status status =
           Status.FAILED_PRECONDITION.withDescription(
-              "Not enough money in account for requested withdrawl.");
+              "Not enough money in account for requested withdrawl. Balance: "
+                  + balance
+                  + " Amount: "
+                  + amount);
       responseObserver.onError(status.asRuntimeException());
       return;
     }
