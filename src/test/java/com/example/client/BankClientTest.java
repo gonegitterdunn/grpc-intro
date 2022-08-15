@@ -12,12 +12,10 @@ import org.junit.jupiter.api.TestInstance;
 // creates instance variables in setup instead of statics
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BankClientTest {
-
   private BankServiceGrpc.BankServiceBlockingStub blockingStub;
 
   @BeforeAll
   public void setup() {
-
     ManagedChannel managedChannel =
         ManagedChannelBuilder.forAddress("localhost", 6565).usePlaintext().build();
 
@@ -27,9 +25,9 @@ public class BankClientTest {
   @Test
   public void balanceTest() {
     BalanceCheckRequest balanceCheckRequest =
-        BalanceCheckRequest.newBuilder().setAccountNumber(5).build();
-    Balance balance = this.blockingStub.getBalance(balanceCheckRequest);
+        BalanceCheckRequest.newBuilder().setAccountNumber(4).build();
 
-    System.out.println("Received: " + balance.getAmount());
+    Balance balance = this.blockingStub.getBalance(balanceCheckRequest);
+    System.out.println(balance);
   }
 }
