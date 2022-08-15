@@ -13,6 +13,7 @@ import io.grpc.ServerBuilder;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 // creates instance variables in setup instead of statics
@@ -51,10 +52,11 @@ public class BankClientTest {
   }
 
   @Test
-  public void withdrawAsyncTest() {
+  public void withdrawAsyncTest() throws InterruptedException {
+    CountDownLatch countDownLatch = new CountDownLatch(1);
     WithdrawlRequest withdrawlRequest =
         WithdrawlRequest.newBuilder().setAccountNumber(5).setAmount(90).build();
-    nonblockingStub.withdraw(withdrawlRequest, new WithdrawStreamingResponse());
-    Uninterruptibles.sleepUninterruptibly(6, TimeUnit.SECONDS);
+    nonblockingStub.withdraw(withdrawlRequest, new WithdrawStreamingResponse(countDownLatch));
+    countDownLatch.await();
   }
 }
