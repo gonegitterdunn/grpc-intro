@@ -1,18 +1,19 @@
 package com.example.client;
 
 import com.example.grpc.models.*;
-import com.example.server.BankService;
-import com.google.common.util.concurrent.Uninterruptibles;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import io.grpc.stub.StreamObserver;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
-import java.io.IOException;
+import javax.net.ssl.SSLException;
+import java.io.File;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 // creates instance variables in setup instead of statics
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -21,9 +22,13 @@ public class BankClientTest {
   private BankServiceGrpc.BankServiceStub nonblockingStub;
 
   @BeforeAll
-  public void setup() {
+  public void setup() throws SSLException {
+
+    SslContext sslContext =
+        GrpcSslContexts.forClient().trustManager(new File("/Users/demo_certs/ca.cert.pem")).build();
+
     ManagedChannel managedChannel =
-        ManagedChannelBuilder.forAddress("localhost", 6565).usePlaintext().build();
+        NettyChannelBuilder.forAddress("localhost", 6565).sslContext(sslContext).build();
 
     blockingStub = BankServiceGrpc.newBlockingStub(managedChannel);
     nonblockingStub = BankServiceGrpc.newStub(managedChannel);
@@ -36,13 +41,13 @@ public class BankClientTest {
 
     Balance balance = this.blockingStub.getBalance(balanceCheckRequest);
     System.out.println(balance);
-    Assertions.assertEquals(40, balance.getAmount());
+    Assertions.assertEquals(100, balance.getAmount());
   }
 
   @Test
   public void withdrawTest() {
     WithdrawlRequest withdrawlRequest =
-        WithdrawlRequest.newBuilder().setAccountNumber(9).setAmount(80).build();
+        WithdrawlRequest.newBuilder().setAccountNumber(9).setAmount(10).build();
 
     this.blockingStub
         .withdraw(withdrawlRequest)
