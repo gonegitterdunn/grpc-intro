@@ -10,6 +10,7 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Executors;
 
 public class GrpcServer {
 
@@ -24,6 +25,7 @@ public class GrpcServer {
 
     Server server =
         NettyServerBuilder.forPort(6565)
+            .executor(Executors.newFixedThreadPool(20))
             .sslContext(sslContext)
             .addService(new BankService())
             .addService(new TransferService())
